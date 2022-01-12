@@ -21,7 +21,8 @@ RUN pip3 install --no-cache-dir allosaurus
 RUN pip install -U flask-cors
 
 # Enter entry point parameters executing the container
-ENTRYPOINT ["python", "./main.py"] 
+# ENTRYPOINT ["python", "./main.py"] 
+ENTRYPOINT ["python", "./app.py"] 
 
 # Expose the required port
 EXPOSE 5000
