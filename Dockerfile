@@ -10,7 +10,11 @@ COPY . .
 # Install dependencies
 RUN apt-get -y update
 RUN apt-get update && apt-get install -y python3 python3-pip
-RUN pip3 install -r requirements.txt
+# RUN pip3 install -r requirements.txt
+RUN pip3 install flask
+RUN pip3 install allosaurus
+RUN pip3 install -U flask-cors
+
 
 # Enter entry point parameters executing the container
 ENTRYPOINT ["python", "./main.py"] 
