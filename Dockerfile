@@ -15,7 +15,6 @@ RUN pip3 install flask
 RUN pip3 install allosaurus
 RUN pip3 install -U flask-cors
 
-
 # Enter entry point parameters executing the container
 ENTRYPOINT ["python", "./main.py"] 
 
