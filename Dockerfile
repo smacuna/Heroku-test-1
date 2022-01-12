@@ -13,7 +13,7 @@ RUN apt-get update
 # RUN apt-get install -y python3 python3-pip
 # RUN pip3 install -r requirements.txt
 RUN pip install flask
-RUN pip install allosaurus || true
+# RUN pip install allosaurus
 RUN pip install -U flask-cors
 
 # Enter entry point parameters executing the container
