@@ -14,6 +14,7 @@ RUN apt-get update
 # RUN pip3 install -r requirements.txt
 RUN pip install flask
 # RUN pip install allosaurus
+RUN pip install torch==1.10.1
 RUN pip install -U flask-cors
 
 # Enter entry point parameters executing the container
