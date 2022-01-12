@@ -17,6 +17,7 @@ RUN apt-get install -y python3 python3-pip
 RUN pip install flask
 # RUN pip install allosaurus
 RUN pip3 install --no-cache-dir torch==1.10.1
+RUN pip3 install --no-cache-dir allosaurus
 RUN pip install -U flask-cors
 
 # Enter entry point parameters executing the container
