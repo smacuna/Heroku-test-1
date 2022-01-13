@@ -86,8 +86,10 @@ def home():
 @app.route('/upload', methods=['GET', 'POST', 'OPTIONS'])
 def upload():
     if request.method == 'OPTIONS':  # CORS prelight
+        print('Options!')
         return _build_cors_prelight_response()
     elif request.method == 'POST':
+        print('Post!')
         byte_data = bytes(request.json['audio'])
         webm_path, tempDir = save_to_webm(byte_data, 'test')
         wav_path = convert_webm_to_wav(webm_path)
