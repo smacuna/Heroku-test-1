@@ -1,5 +1,5 @@
 from flask import Flask, request
-from flask_cors import CORS
+from flask_cors import CORS, cross_origin
 import subprocess
 from libraries.corregir_lectura import evaluar_desempeno
 from allosaurus.app import read_recognizer
@@ -75,6 +75,7 @@ def evaluate(filename, target):
 def home():
     return '<h1>Hola gente!</h1>'
 
+@cross_origin
 @app.route('/upload', methods=['GET', 'POST'])
 def upload():
     byte_data = bytes(request.json['audio'])
