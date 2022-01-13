@@ -181,8 +181,8 @@ def formato_api(partes):
                 'color' : colores_letras[letra.color],
             })
             i += 1
-    return jsonify(lista)
-
+    # return jsonify(lista)
+    return lista
 
 def evaluar_desempeno(original, grabacion, show=True, api=False):
     partes_res, partes_or = obtener_partes(grabacion, original)
@@ -253,7 +253,7 @@ def evaluar_desempeno(original, grabacion, show=True, api=False):
         lista = formato_api(partes_res)
         score = obtener_porcentaje(partes_res)
         output_json = {'letters-list': lista, 'score': score}
-        return output_json
+        return jsonify(output_json)
 
     return lista
 
