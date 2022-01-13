@@ -20,6 +20,8 @@ RUN pip3 install --no-cache-dir torch==1.10.1
 RUN pip3 install --no-cache-dir allosaurus
 RUN pip install -U flask-cors
 
+RUN apt update && apt install ffmpeg -y
+
 # Enter entry point parameters executing the container
 # ENTRYPOINT ["python", "./main.py"] 
 ENTRYPOINT ["python", "./app.py"] 
