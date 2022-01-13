@@ -1,5 +1,5 @@
 from flask import Flask, request
-from flask_cors import CORS  
+from flask_cors import CORS, cross_Origin
 import subprocess
 from libraries.corregir_lectura import evaluar_desempeno
 from allosaurus.app import read_recognizer
@@ -10,8 +10,8 @@ UPLOAD_FOLDER = '/tmp'
 app = Flask(__name__)
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 
-CORS(app)
-
+cors = CORS(app)
+app.config['CORS_HEADERS'] = 'Content-Type'
 
 def save_to_webm(audio_data, filename):
     '''
