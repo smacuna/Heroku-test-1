@@ -1,6 +1,6 @@
 from allosaurus.app import read_recognizer
 import random
-from flask import jsonify
+from flask import json, jsonify
 
 class bcolors:
     MORADO = '\033[95m'
@@ -250,7 +250,10 @@ def evaluar_desempeno(original, grabacion, show=True, api=False):
         print(obtener_porcentaje(partes_res))
 
     if api:
-        return formato_api(partes_res)
+        lista = formato_api(partes_res)
+        score = obtener_porcentaje(partes_res)
+        output_json = {'letters-list': lista, 'score': score}
+        return output_json
 
     return lista
 

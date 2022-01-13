@@ -66,8 +66,8 @@ def evaluate(filename, target):
     '''
     a = model.recognize(filename, 'spa')
     lista_a = a.split(" ")
-    print(*target)
-    print(*lista_a)
+    # print(*target)
+    # print(*lista_a)
     return evaluar_desempeno(target, lista_a, api=True)
 
 def _build_cors_prelight_response():
