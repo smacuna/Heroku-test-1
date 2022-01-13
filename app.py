@@ -1,4 +1,4 @@
-from flask import Flask, request
+from flask import Flask, request, make_response, jsonify
 from flask_cors import CORS, cross_origin
 import subprocess
 from libraries.corregir_lectura import evaluar_desempeno
@@ -70,20 +70,30 @@ def evaluate(filename, target):
     print(*lista_a)
     return evaluar_desempeno(target, lista_a, api=True)
 
+def _build_cors_prelight_response():
+    response = make_response()
+    response.headers.add('Access-Control-Allow-Origin', '*')
+    response.headers.add('Access-Control-Allow-Headers', '*')
+    response.headers.add('Access-Control-Allow-Methods', '*')
+    return response
+
 
 @app.route('/')
 def home():
     return '<h1>Hola gente!</h1>'
 
 @cross_origin
-@app.route('/upload', methods=['GET', 'POST'])
+@app.route('/upload', methods=['GET', 'POST', 'OPTIONS'])
 def upload():
-    byte_data = bytes(request.json['audio'])
-    webm_path, tempDir = save_to_webm(byte_data, 'test')
-    wav_path = convert_webm_to_wav(webm_path)
-    # target = 'e s t e s u n k o ð i ɡ o ð e x e m p l o'.split(" ")
-    target = request.json['target'].split(" ")
-    return evaluate(wav_path, target)
+    if request.method == 'OPTIONS':  # CORS prelight
+        return _build_cors_prelight_response()
+    elif request.method == 'POST':
+        byte_data = bytes(request.json['audio'])
+        webm_path, tempDir = save_to_webm(byte_data, 'test')
+        wav_path = convert_webm_to_wav(webm_path)
+        # target = 'e s t e s u n k o ð i ɡ o ð e x e m p l o'.split(" ")
+        target = request.json['target'].split(" ")
+        return evaluate(wav_path, target)
 
 
 model = read_recognizer()
