@@ -1,5 +1,5 @@
 from flask import Flask, request
-from flask_cors import CORS, cross_Origin
+from flask_cors import CORS
 import subprocess
 from libraries.corregir_lectura import evaluar_desempeno
 from allosaurus.app import read_recognizer
