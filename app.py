@@ -98,5 +98,6 @@ def upload():
         return evaluate(wav_path, target)
 
 
-model = read_recognizer()
-app.run(host='0.0.0.0', port=int(os.environ.get('PORT', 5000)))
+
+# model = read_recognizer()
+# app.run(host='0.0.0.0', port=int(os.environ.get('PORT', 5000)))
