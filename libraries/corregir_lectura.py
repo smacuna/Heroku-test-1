@@ -184,7 +184,7 @@ def formato_api(partes):
     # return jsonify(lista)
     return lista
 
-def evaluar_desempeno(original, grabacion, show=True, api=False):
+def evaluar_desempeno(original, grabacion, show=True, api=False, lista_b=False):
     partes_res, partes_or = obtener_partes(grabacion, original)
     # print(partes_res)
     # print(partes_or)
@@ -253,6 +253,8 @@ def evaluar_desempeno(original, grabacion, show=True, api=False):
         lista = formato_api(partes_res)
         score = obtener_porcentaje(partes_res)
         output_json = {'letters-list': lista, 'score': score}
+        if lista_b:
+            output_json['model_spanish3': lista_b]
         return jsonify(output_json)
 
     return lista

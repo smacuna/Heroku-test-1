@@ -4,6 +4,7 @@ import subprocess
 from libraries.corregir_lectura import evaluar_desempeno
 from allosaurus.app import read_recognizer
 import os
+import shutil
 
 UPLOAD_FOLDER = '/tmp'
 
@@ -66,9 +67,12 @@ def evaluate(filename, target):
     '''
     a = model.recognize(filename, 'spa')
     lista_a = a.split(" ")
+
+    b = model_2.recognize(filename, 'spa')
+    lista_b = b.split(" ")
     # print(*target)
     # print(*lista_a)
-    return evaluar_desempeno(target, lista_a, api=True)
+    return evaluar_desempeno(target, lista_a, api=True, lista_b=lista_b)
 
 def _build_cors_prelight_response():
     response = make_response()
@@ -98,6 +102,10 @@ def upload():
         return evaluate(wav_path, target)
 
 
+src = 'models/spanish3'
+dst = '/usr/local/lib/python3.9/site-packages/allosaurus/pretrained'
+shutil.move(src, dst)
 
 model = read_recognizer()
+model_2 = read_recognizer('spanish3')
 app.run(host='0.0.0.0', port=int(os.environ.get('PORT', 5000)))
