@@ -202,7 +202,7 @@ def evaluar_desempeno(original, grabacion, show=True, api=False, lista_b=False):
                 # 
                 #         letra.color = bcolors.AMARILLO
             
-            if i == len(partes_res.lista) - 1 and i < len(partes_or):  # No hay más verdes al lado derecho
+            if i == len(partes_res.lista) - 1 and i < len(partes_or.lista):  # No hay más verdes al lado derecho
                 # Subseparar el problema
                 # print(partes_or[i])
                 lista_or = formar_listas(partes_or[i])
