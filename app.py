@@ -105,7 +105,7 @@ def upload():
 model = read_recognizer()
 
 src = 'models/spanish3'
-dst = '/usr/local/lib/python3.9/site-packages/allosaurus/pretrained'
+dst = '/usr/local/lib/python3.8/site-packages/allosaurus/pretrained'
 shutil.move(src, dst)
 
 model_2 = read_recognizer('spanish3')
