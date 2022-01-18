@@ -102,10 +102,11 @@ def upload():
         return evaluate(wav_path, target)
 
 
+model = read_recognizer()
+
 src = 'models/spanish3'
 dst = '/usr/local/lib/python3.9/site-packages/allosaurus/pretrained'
 shutil.move(src, dst)
 
-model = read_recognizer()
 model_2 = read_recognizer('spanish3')
 app.run(host='0.0.0.0', port=int(os.environ.get('PORT', 5000)))
