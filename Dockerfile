@@ -1,8 +1,6 @@
 # Create a ubuntu base image with python 3 installed
 FROM python:3.8
 
-
-
 # Set the working directory
 WORKDIR /
 
