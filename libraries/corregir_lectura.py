@@ -254,7 +254,7 @@ def evaluar_desempeno(original, grabacion, show=True, api=False, lista_b=False):
         score = obtener_porcentaje(partes_res)
         output_json = {'letters-list': lista, 'score': score}
         if lista_b:
-            output_json['model_spanish3': lista_b]
+            output_json['model_spanish3'] = lista_b
         return jsonify(output_json)
 
     return lista
