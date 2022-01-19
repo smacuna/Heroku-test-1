@@ -70,9 +70,12 @@ def evaluate(filename, target):
 
     b = model_2.recognize(filename, 'spa')
     lista_b = b.split(" ")
+
+    c = model_2.recognize(filename, 'spa')
+    lista_c = c.split(" ")
     # print(*target)
     # print(*lista_a)
-    return evaluar_desempeno(target, lista_a, api=True, lista_b=lista_b)
+    return evaluar_desempeno(target, lista_a, api=True, lista_b=lista_b, lista_c=lista_c)
 
 def _build_cors_prelight_response():
     response = make_response()
@@ -109,4 +112,9 @@ dst = '/usr/local/lib/python3.8/site-packages/allosaurus/pretrained'
 shutil.move(src, dst)
 
 model_2 = read_recognizer('spanish3')
+
+src = 'models/spanish8'
+dst = '/usr/local/lib/python3.8/site-packages/allosaurus/pretrained'
+shutil.move(src, dst)
+model_3 = read_recognizer('spanish3')
 app.run(host='0.0.0.0', port=int(os.environ.get('PORT', 5000)))
