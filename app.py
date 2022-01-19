@@ -71,7 +71,7 @@ def evaluate(filename, target):
     b = model_2.recognize(filename, 'spa')
     lista_b = b.split(" ")
 
-    c = model_2.recognize(filename, 'spa')
+    c = model_3.recognize(filename, 'spa')
     lista_c = c.split(" ")
     # print(*target)
     # print(*lista_a)
