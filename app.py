@@ -116,5 +116,5 @@ model_2 = read_recognizer('spanish3')
 src = 'models/spanish8'
 dst = '/usr/local/lib/python3.8/site-packages/allosaurus/pretrained'
 shutil.move(src, dst)
-model_3 = read_recognizer('spanish3')
+model_3 = read_recognizer('spanish8')
 app.run(host='0.0.0.0', port=int(os.environ.get('PORT', 5000)))
