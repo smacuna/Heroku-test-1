@@ -83,9 +83,9 @@ def evaluate(filename, target, word):
     # print(*lista_a)
     # return evaluar_desempeno(target, lista_a, api=True, lista_b=lista_b, lista_c=lista_c)
     output = compare_words(target, lista_c, word, api=True, show=False, jsonif=False)
-    output['model_original': lista_a]
-    output['model_spanish3': lista_b]
-    output['model_spanish8': lista_c]
+    output['model_original'] = lista_a
+    output['model_spanish3'] = lista_b
+    output['model_spanish8'] = lista_c
 
     return jsonify(output)
 
