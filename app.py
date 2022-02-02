@@ -101,6 +101,7 @@ def _build_cors_prelight_response():
 def home():
     return '<h1>Hola gente!</h1>'
 
+
 @cross_origin
 @app.route('/upload', methods=['GET', 'POST', 'OPTIONS'])
 def upload():
@@ -118,6 +119,24 @@ def upload():
         # return evaluate(wav_path, target)
         return evaluate(wav_path, target, word)
 
+
+@cross_origin
+@app.route('/test_speed', methods=['GET', 'POST', 'OPTIONS'])
+def test_speed():
+    if request.method == 'OPTIONS':  # CORS prelight
+        print('Options!')
+        return _build_cors_prelight_response()
+    elif request.method == 'POST':
+        print('Post!')
+        # byte_data = bytes(request.json['audio'])
+        # webm_path, tempDir = save_to_webm(byte_data, 'test')
+        # wav_path = convert_webm_to_wav(webm_path)
+        # target = 'e s t e s u n k o ð i ɡ o ð e x e m p l o'.split(" ")
+        target = request.json['target'].split(" ")
+        word = list(request.json['word'])
+        result = request.json['result'].split(" ")
+        # return evaluate(wav_path, target)
+        return jsonify(compare_words(target, result, word, api=True, show=False, jsonif=False))
 
 
 model = read_recognizer()
