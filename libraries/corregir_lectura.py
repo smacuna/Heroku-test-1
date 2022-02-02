@@ -507,7 +507,8 @@ if __name__ == '__main__':
 
     output_list = compare_words(target, result, original, api=False, show=True)
 
-    original = 'g u i t a r r a'.split(' ')
+    original = list('guitarra')
+    print(original)
     target   = 'ɡ i t a r a'.split(' ')
     result   = 'ɡ i t a t l a'.split(' ')
     print(compare_words(target, result, original, api=True, show=True))

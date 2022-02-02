@@ -114,7 +114,7 @@ def upload():
         wav_path = convert_webm_to_wav(webm_path)
         # target = 'e s t e s u n k o ð i ɡ o ð e x e m p l o'.split(" ")
         target = request.json['target'].split(" ")
-        word = request.json['word'].split("")
+        word = list(request.json['word'])
         # return evaluate(wav_path, target)
         return evaluate(wav_path, target, word)
 
