@@ -1,7 +1,7 @@
 from flask import Flask, request, make_response, jsonify
 from flask_cors import CORS, cross_origin
 import subprocess
-from libraries.corregir_lectura import evaluar_desempeno
+from libraries.corregir_lectura import evaluar_desempeno, compare_words
 from allosaurus.app import read_recognizer
 import os
 import shutil
@@ -50,7 +50,7 @@ def convert_webm_to_wav(file):
     subprocess.run(command,stdout=subprocess.PIPE,stdin=subprocess.PIPE)
     return wav_path
 
-def evaluate(filename, target):
+def evaluate(filename, target, word):
     '''
     Función para evaluar el rendimiento del audio ubicado en 'filename' comparándolo con el objetivo 'target'
     
@@ -58,12 +58,18 @@ def evaluate(filename, target):
         filename -> string con la ubicación del archivo a evaluar
         target -> lista de las letras de una pronunciación correcta de la palabra a evaluar
         ----> ej: target = ['e', 'x', 'e', 'm', 'p', 'l', 'o']
+        word -> lista de las letras de la palabra a evaluar
+        ----> ej: word = ['e', 'j', 'e', 'm', 'p', 'l', 'o']
 
     output:
-        json: lista cuyos elementos son diccionarios que tienen la información relacionada a cada letra que se dijo
-        ----> letra['color'] == 'green'  -> Letra fue bien dicha
-              letra['color'] == 'yellow' -> Letra no escuchada como la versión correcta / con errores mínimos
-              letra['color'] == 'red'    -> Letra mal dicha 
+        json:
+        - 'warning': tipo de advertencia ('more': la palabra reconocida tiene más fonemas que el 'target'
+                                          'less': la palabra reconocida tiene menos fonemas que el 'target')
+        - 'warning_text': texto detallado de la advertencia
+        - 'list': lista cuyos elementos son diccionarios que tienen la información relacionada a cada letra que se dijo
+            ----> letra['color'] == 'green'  -> Letra fue bien dicha
+                  letra['color'] == 'yellow' -> Letra no escuchada como la versión correcta / con errores mínimos
+                  letra['color'] == 'red'    -> Letra mal dicha 
     '''
     a = model.recognize(filename, 'spa')
     lista_a = a.split(" ")
@@ -75,7 +81,13 @@ def evaluate(filename, target):
     lista_c = c.split(" ")
     # print(*target)
     # print(*lista_a)
-    return evaluar_desempeno(target, lista_a, api=True, lista_b=lista_b, lista_c=lista_c)
+    # return evaluar_desempeno(target, lista_a, api=True, lista_b=lista_b, lista_c=lista_c)
+    output = compare_words(target, lista_c, word, api=True, show=False, jsonif=False)
+    output['model_original': lista_a]
+    output['model_spanish3': lista_b]
+    output['model_spanish8': lista_c]
+
+    return jsonify(output)
 
 def _build_cors_prelight_response():
     response = make_response()
@@ -102,7 +114,10 @@ def upload():
         wav_path = convert_webm_to_wav(webm_path)
         # target = 'e s t e s u n k o ð i ɡ o ð e x e m p l o'.split(" ")
         target = request.json['target'].split(" ")
-        return evaluate(wav_path, target)
+        word = request.json['word'].split("")
+        # return evaluate(wav_path, target)
+        return evaluate(wav_path, target, word)
+
 
 
 model = read_recognizer()

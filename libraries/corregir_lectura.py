@@ -1,6 +1,7 @@
 from allosaurus.app import read_recognizer
 import random
-from flask import json, jsonify
+import json
+from flask import jsonify
 
 class bcolors:
     MORADO = '\033[95m'
@@ -263,19 +264,267 @@ def evaluar_desempeno(original, grabacion, show=True, api=False, lista_b=False, 
     return lista
 
 
+class Letter:
+    def __init__(self, letter, color=bcolors.ROJO, result_index=-1):
+        self.letter = letter
+        self.color = color
+        self.result_index = result_index
+    
+    def __str__(self):
+        return f"{self.color}{self.letter}{bcolors.ENDC}"
+    
+    def __repr__(self):
+        return f"{self.color}{self.letter}{bcolors.ENDC}"
+
+
+def compare(target, result, original):
+    # Esta función está hecha para el idioma español
+    ignorable = set()  # Este set es para índices de palabras (i) que deben ser ignoradas
+    i_target = 0
+    j_result_start = 0
+    j_result = 0
+    output_list = []
+    first = True
+
+    warning_more =  len(result) > len(target)
+    warning_less =  len(result) < len(target)
+
+    last_h = False
+
+    for i, letter in enumerate(original):
+        
+
+        if i in ignorable:  # Si el índice (i) está en 'ignorable', se debe continuar al nuevo ciclo
+            if i - 1 >= 0:
+                output_list.append(Letter(letter, output_list[-1].color))
+            continue
+
+        if letter == 'q':  # Se deben manejar los casos 'que' y 'qui' ('ke' y 'ki')
+            if i + 1 < len(original) and i + 2 < len(original):
+                if original[i+1] == 'u' and (original[i+2] == 'e' or original[i+2] == 'i'):
+                    ignorable.add(i+1)
+        elif letter == 'g':  # Se deben manejar los casos 'gue' y 'gui' ('ɡe' y 'ɡi')
+            if i + 1 < len(original) and i + 2 < len(original):
+                if original[i+1] == 'u' and (original[i+2] == 'e' or original[i+2] == 'i'):
+                    ignorable.add(i+1)
+        elif letter == 'r':  # Se debe manejar el caso de la 'rr'
+            if i + 1 < len(original):
+                if original[i+1] == 'r':
+                    ignorable.add(i+1)
+        elif letter == 'l':  # Se debe manejar el caso de la 'll'
+            if i + 1 < len(original):
+                if original[i+1] == 'l':
+                    ignorable.add(i+1)
+        # elif letter == 'ch':  # Se debe manejar el caso de la 'ch'
+        elif letter == 'c':  # Se debe manejar el caso de la 'ch' y de la 'cc'
+            if i + 1 < len(original):
+                if original[i+1] == 'h' or original[i+1] == 'c':
+                    ignorable.add(i+1)
+        elif letter == 's':  # Se debe manejar el caso de la 'sh' (ejemplo: sushi)
+            if i + 1 < len(original):
+                if original[i+1] == 'h':
+                    ignorable.add(i+1)
+
+        if letter == 'h':  # Se debe manejar el caso de la 'h' muda
+            # Si se entró acá, significa que no viene de una 'ch' ni de una 'sh'
+            # En este caso, se debe ignorar directamente
+            last_h = True
+            continue
+        
+        found = False
+        tolerance = 3  # Este número indica el grado de tolerancia de letras entremedio de letras correctas
+        last_j = j_result + tolerance
+        if first:
+            last_j = len(result)
+        
+        for j in range(j_result, last_j):  # Desde que empieza la palabra restante en 'result' hasta lo que indica 'last_j'
+            if j < len(result):
+                r_phone = result[j]
+                # print(f'{letter}: j = {j} -> r_phone = {r_phone}')
+                if r_phone == target[i_target]:  # Si encontramos el fonema actual 'i_target'
+                    found = True
+                    j_result = j + 1
+                    if first:  # Si es la primera letra
+                        first = False
+                        j_result_start = j
+                    break
+            else:
+                break
+            
+        if not found:  # Si no se encontró el fonema correspondiente a la letra actual
+            if last_h:
+                output_list.append(Letter(original[i-1], bcolors.ROJO))
+                last_h = False
+            output_list.append(Letter(letter, bcolors.ROJO))
+
+
+        else:  # Si se encontró
+            if last_h:
+                output_list.append(Letter(original[i-1], bcolors.VERDE))
+                last_h = False
+            output_list.append(Letter(letter, bcolors.VERDE, result_index=j_result-1))
+
+        i_target += 1
+
+    last_green = -10
+    next_green = -100
+    # last_green_index = -10
+    # last_was_green = False
+    for o_i, output_letter in enumerate(output_list):
+        if output_letter.color == bcolors.ROJO:
+            if o_i + 1 < len(output_list):
+                for next_i, next_letter in enumerate(output_list[o_i+1:]):
+                    if next_letter.color == bcolors.VERDE:
+                        next_green = next_letter.result_index
+                        # print(last_green, next_green)
+                        break
+                if last_green + tolerance <= next_green:  # El 2 aquí tambien marca un grado de tolerancia
+                    output_list[o_i].color = bcolors.AMARILLO
+            # last_was_green = False
+        elif output_letter.color == bcolors.VERDE:
+            # Si es que entre dos verdes hay fonemas en result, los colores de las letras que lo rodean deben ser amarillo
+            
+            
+            # if last_was_green:
+            #     if last_green + 1 != output_letter.result_index:
+                    # output_list[last_green_index].color = bcolors.AMARILLO
+            #         output_list[o_i].color = bcolors.AMARILLO
+            # last_green_index = o_i
+            # last_was_green = True
+
+            last_green = output_letter.result_index
+
+    return output_list
+
+def score_results(letters_list):
+    length = len(letters_list)
+    suma = 0
+
+    # Verdes suman 1
+    greens = [letter for letter in letters_list if letter.color == bcolors.VERDE]
+    suma += len(greens)
+
+     # Amarillos suman 0.5
+    yellows = [letter for letter in letters_list if letter.color == bcolors.AMARILLO]
+    suma += 0.5*len(yellows)
+
+    score = suma/length
+    return score
+
+
+def api_format(letters_list, warning='', warning_text='', jsonif=False):
+    json_dict = {
+        'warning': warning, 
+        'warning_text': warning_text
+    }
+    json_list = []
+    letter_colors = {
+        bcolors.VERDE: 'green',
+        bcolors.AMARILLO: 'yellow',
+        bcolors.ROJO: 'red'
+    }
+    i = 0
+    for i, letter in enumerate(letters_list):
+        json_list.append({
+            'id'    : i,
+            'letter': letter.letter,
+            'color' : letter_colors[letter.color],
+        })
+    json_dict['letters-list'] = json_list
+    json_dict['score'] = score_results(letters_list)
+    if jsonif:
+        return jsonify(json_dict)
+    return json_dict
+
+def compare_words(target, result, original, api=False, show=False, jsonif=False):
+
+    output_list = compare(target, result, original)
+    
+    warning = ''
+    warning_text = ''
+    if len(result) > len(target):
+        warning = 'more'
+        warning_text = f'Result has more phonemes than target (len(result) = {len(result)} > len(target) = {len(target)})'
+    elif len(result) < len(target):
+        warning = 'less'
+        warning_text = f'Result has less phonemes than target (len(result) = {len(result)} < len(target) = {len(target)})'
+
+    if show:
+        if warning_text != '':
+            print(f"{bcolors.MORADO}{warning_text}{bcolors.ENDC}")
+        print(*output_list)
+        
+    if api:
+        return api_format(output_list, warning=warning, warning_text=warning_text, jsonif=jsonif)
+
+    return output_list
+
+
 if __name__ == '__main__':
-    print("hola")
 
     model = read_recognizer()
+    
+    # original = 'c ó m o d o'.split(' ')
+    # target   = 'k o m o ð o'.split(' ')
+    # result   = 'k o m o s o'.split(' ')
 
-    a = model.recognize('audio_ejemplos/codigodeejemplo.wav', 'spa')
+    original = 'c h a n c h o'.split(' ')
+    target   = 'ʃ a n ʃ o'.split(' ')
+    result   = 'a s g k h f h ʃ a n a a n ʃ o s o p'.split(' ')
+
+    # print(*compare(target, result, original))
+    output_list = compare_words(target, result, original, api=False, show=True)
+
+    original = 'q u i q u e'.split(' ')
+    target   = 'k i k e'.split(' ')
+    result   = 'k i k e'.split(' ')
+
+    output_list = compare_words(target, result, original, api=False, show=True)
+
+    original = 'p r ó x i m o'.split(' ')
+    target   = 'p ɾ o ks i m o'.split(' ')
+    result   = 'p ɾ o ks i m o'.split(' ')
+
+    output_list = compare_words(target, result, original, api=False, show=True)
+
+    original = 'a c c i ó n'.split(' ')
+    target   = 'a ks i o n'.split(' ')
+    result   = 'a ks i o n'.split(' ')
+
+    output_list = compare_words(target, result, original, api=False, show=True)
+
+
+    original = 'g u i t a r r a'.split(' ')
+    target   = 'ɡ i t a r a'.split(' ')
+    result   = 'ɡ i t a a'.split(' ')
+
+    output_list = compare_words(target, result, original, api=False, show=True)
+
+
+    original = 'h a l l a r'.split(' ')
+    target   = 'a y a ɾ'.split(' ')
+    result   = 'a y a ɾ'.split(' ')
+
+    output_list = compare_words(target, result, original, api=False, show=True)
+
+    original = 'g u i t a r r a'.split(' ')
+    target   = 'ɡ i t a r a'.split(' ')
+    result   = 'ɡ i t a t l a'.split(' ')
+    print(compare_words(target, result, original, api=True, show=True))
+    # print(compare_words(target, result, original, api=True, show=True, jsonif=True))
+
+    
+    '''
+    # a = model.recognize('audio_ejemplos/codigodeejemplo.wav', 'spa')
     #print(*a.split(" "))
 
-    lista_a = a.split(" ")
+    # lista_a = a.split(" ")
 
-    # lista_a = 'e s t e s u n k o ð i ɡ o ð e x i m l o t e'.split(" ")
+    lista_a = 'e s t e s u n k o ð i ɡ o ð e x i m l o t e'.split(" ")
     original = 'e s t e s u n k o ð i ɡ o ð e x e m p l o'.split(" ")
     # letras = comparar_resultado('e s t e s u n k o ð i ɡ o ð e x e m p l o'.split(" "), a.split(" "), show=True)
 
     print(*original)
-    print(*evaluar_desempeno(original, lista_a))
+    print(evaluar_desempeno(original, lista_a, api=True))
+    '''
+    
