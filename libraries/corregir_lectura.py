@@ -16,6 +16,30 @@ class bcolors:
 
 colores = [bcolors.MORADO, bcolors.AZUL, bcolors.CYAN, bcolors.VERDE, bcolors.AMARILLO, bcolors.ROJO]
 
+sim_letters = {
+    'a': {'a', 'æ'}, 
+    'æ': {'æ', 'ɛ', 'a', 'e'}, 
+    'β': {'β', 'b'}, 
+    'b': {'β', 'b'}, 
+    'ʃ': {'ʃ', 't͡ʃ'}, 
+    't͡ʃ': {'ʃ', 't͡ʃ'}, 
+    'ɛ': {'ɛ', 'e', 'æ'}, 
+    'e': {'ɛ', 'e', 'æ'}, 
+    'i': {'i', 'ʝ', 'j', 'ʤ'}, 
+    'j': {'i', 'ʝ', 'j', 'ʤ'}, 
+    'ɡ': {'ɡ', 'ɣ'}, 
+    'ɣ': {'ɡ', 'ɣ'}, 
+    'l̪': {'l̪', 'l'}, 
+    'l': {'l̪', 'l'}, 
+    'ɔ': {'ɔ', 'o'}, 
+    'o': {'ɔ', 'o'}, 
+    's': {'s', 's̪'}, 
+    's̪': {'s', 's̪'}, 
+    't̪': {'t̪', 't'}, 
+    't': {'t̪', 't'}, 
+    'ʤ': {'ʤ', 'ʝ', 'i', 'j'}, 
+    'ʝ': {'ʤ', 'ʝ', 'i', 'j'}
+}
 
 class Letra:
     def __init__(self, letra, color) -> None:
@@ -341,7 +365,15 @@ def compare(target, result, original):
             if j < len(result):
                 r_phone = result[j]
                 # print(f'{letter}: j = {j} -> r_phone = {r_phone}')
-                if r_phone == target[i_target]:  # Si encontramos el fonema actual 'i_target'
+                if r_phone in sim_letters:
+                    if target[i_target] in sim_letters[r_phone]:
+                        found = True
+                        j_result = j + 1
+                        if first:  # Si es la primera letra
+                            first = False
+                            j_result_start = j
+                        break 
+                elif r_phone == target[i_target]:  # Si encontramos el fonema actual 'i_target'
                     found = True
                     j_result = j + 1
                     if first:  # Si es la primera letra
