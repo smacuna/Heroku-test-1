@@ -1,6 +1,7 @@
 from allosaurus.app import read_recognizer
 import random
 import json
+from click import pass_context
 from flask import jsonify
 
 class bcolors:
@@ -301,8 +302,7 @@ class Letter:
         return f"{self.color}{self.letter}{bcolors.ENDC}"
 
 
-def compare(target, result, original):
-    # Esta función está hecha para el idioma español
+def analyze_comparison(target, result, original, tolerance=3):
     ignorable = set()  # Este set es para índices de palabras (i) que deben ser ignoradas
     i_target = 0
     j_result_start = 0
@@ -314,10 +314,9 @@ def compare(target, result, original):
     warning_less =  len(result) < len(target)
 
     last_h = False
+    # print(f'{bcolors.AZUL}Tolerancia actual {tolerance}{bcolors.ENDC}')
 
-    for i, letter in enumerate(original):
-        
-
+    for i, letter in enumerate(original):  
         if i in ignorable:  # Si el índice (i) está en 'ignorable', se debe continuar al nuevo ciclo
             if i - 1 >= 0:
                 output_list.append(Letter(letter, output_list[-1].color))
@@ -355,32 +354,42 @@ def compare(target, result, original):
             last_h = True
             continue
         
+
+        # tolerance = 3  # Este número indica el grado de tolerancia de letras entremedio de letras correctas
         found = False
-        tolerance = 3  # Este número indica el grado de tolerancia de letras entremedio de letras correctas
         last_j = j_result + tolerance
         if first:
             last_j = len(result)
-        
+
         for j in range(j_result, last_j):  # Desde que empieza la palabra restante en 'result' hasta lo que indica 'last_j'
             if j < len(result):
                 r_phone = result[j]
-                # print(f'{letter}: j = {j} -> r_phone = {r_phone}')
                 if r_phone in sim_letters:
                     if target[i_target] in sim_letters[r_phone]:
+                        # print(f'{bcolors.VERDE}{letter}: j = {j} -> r_phone = {r_phone}{bcolors.ENDC}')
                         found = True
                         j_result = j + 1
                         if first:  # Si es la primera letra
                             first = False
                             j_result_start = j
                         break 
+                    # else:
+                        # print(f'{bcolors.CYAN}{letter}: j = {j} -> r_phone = {r_phone}{bcolors.ENDC}')
+
                 elif r_phone == target[i_target]:  # Si encontramos el fonema actual 'i_target'
+                    # print(f'{bcolors.VERDE}{letter}: j = {j} -> r_phone = {r_phone}{bcolors.ENDC}')
                     found = True
                     j_result = j + 1
                     if first:  # Si es la primera letra
                         first = False
                         j_result_start = j
                     break
+                # else:
+                    # print(f'{bcolors.CYAN}{letter}: j = {j} -> r_phone = {r_phone}{bcolors.ENDC}')
+
+
             else:
+                # print(f'{bcolors.ROJO}{letter}: j = {j} -> r_phone = {r_phone}{bcolors.ENDC}')
                 break
             
         if not found:  # Si no se encontró el fonema correspondiente a la letra actual
@@ -397,6 +406,12 @@ def compare(target, result, original):
             output_list.append(Letter(letter, bcolors.VERDE, result_index=j_result-1))
 
         i_target += 1
+        if i_target >= len(target):
+            for remaining_letter in original[i+1:]:
+                output_list.append(Letter(remaining_letter, bcolors.ROJO))
+            break
+
+    # Fin de for de tolerancia
 
     last_green = -10
     next_green = -100
@@ -410,7 +425,7 @@ def compare(target, result, original):
                         next_green = next_letter.result_index
                         # print(last_green, next_green)
                         break
-                if last_green + tolerance <= next_green:  # El 2 aquí tambien marca un grado de tolerancia
+                if last_green + tolerance >= next_green:  # El 2 aquí tambien marca un grado de tolerancia
                     output_list[o_i].color = bcolors.AMARILLO
             # last_was_green = False
         elif output_letter.color == bcolors.VERDE:
@@ -425,11 +440,81 @@ def compare(target, result, original):
             # last_was_green = True
 
             last_green = output_letter.result_index
-
     return output_list
 
-def score_results(letters_list):
+
+
+def obtain_new_lists(target, original, i):
+    i_or = i
+    new_word = original[i:]
+    k = 0  # Índice en cuestión en target
+    for j in range(i):
+        remove = True
+        or_letter = original[j]
+        if or_letter == 'u':  # Se deben manejar los casos 'que' y 'qui' ('ke' y 'ki') y 'gue' y 'gui' ('ɡe' y 'ɡi')
+            if j - 1 >= 0 and j + 1 < len(original):
+                condition1 = original[j-1] == 'q' and (original[j+1] == 'e' or original[j+1] == 'i')
+                condition2 = original[j-1] == 'g' and (original[j+1] == 'e' or original[j+1] == 'i')
+                if condition1 or condition2:
+                    # print(f'{bcolors.AMARILLO} hola {bcolors.ENDC}')
+                    # No se debe eliminar del target (No se suma 1 a k)
+                    remove = False
+        elif or_letter == 'r':  # Se debe manejar el caso de la 'rr'
+            if j - 1 >= 0:
+                if original[j-1] == 'r':
+                    # No se debe eliminar del target (No se suma 1 a k)
+                    remove = False
+        elif or_letter == 'l':  # Se debe manejar el caso de la 'll'
+            if j - 1 >= 0:
+                if original[j-1] == 'l':
+                    # No se debe eliminar del target (No se suma 1 a k)
+                    remove = False
+        elif or_letter == 'c':  # S debe manejar el caso de la doble 'c' ('cc')
+            if j - 1 >= 0:
+                if original[j-1] == 'c':
+                    # No se debe eliminar del target (No se suma 1 a k)
+                    remove = False
+        elif or_letter == 'h':  # La 'h' nunca suena, ni con vocal ni cuando va acompañada de 'c' o 's'
+            # No se debe eliminar del target (No se suma 1 a k)
+                remove = False
+        if remove:
+            k += 1
+
+    new_target = target[k:]
+
+    return new_target, new_word
+
+def compare(target, result, original):
+    # Esta función está hecha para el idioma español
+    max_tolerance = 3  # Este número indica el grado de tolerancia de letras entremedio de letras correctas
+    # Iteraremos entre los distintos grados de tolerancia hasta el máximo
+    best_list = []
+    best_score = 0
+
+    for i in range(len(original)):  # Se obtendrán las listas de las palabras cortadas
+        new_target, new_word = obtain_new_lists(target, original, i)
+        # print(new_target, new_word)
+
+        for tolerance in range(1, max_tolerance+1):
+            output_list = analyze_comparison(new_target, result, new_word, tolerance=tolerance)
+            new_list = []
+            for letter in original[:i]:
+                new_list.append(Letter(letter, bcolors.ROJO))
+            for letter_class in output_list:
+                new_list.append(letter_class)
+            output_list = new_list[:]
+            # print(*output_list)
+            list_score = score_results(output_list, list_length=len(original))
+            if list_score >= best_score:
+                best_list = output_list.copy()
+                best_score = list_score
+
+    return best_list
+
+def score_results(letters_list, list_length=-1):
     length = len(letters_list)
+    if list_length != -1:
+        length = list_length
     suma = 0
 
     # Verdes suman 1
@@ -496,15 +581,30 @@ if __name__ == '__main__':
 
     model = read_recognizer()
     
-    # original = 'c ó m o d o'.split(' ')
-    # target   = 'k o m o ð o'.split(' ')
-    # result   = 'k o m o s o'.split(' ')
+    
 
+
+    original = list('plelomina')
+    target   = 'p l e l o m i n a'.split(' ')
+    result   = 'o h k a a'.split(' ')
+
+    original = list('elimina')
+    target   = 'e l i m i n a'.split(' ')
+    result   = 'l e m i n a'.split(' ')
+    output_list = compare_words(target, result, original, api=True, show=True)
+    # print(compare_words(target, result, original, api=True, show=True, jsonif=True))
+    """
+
+    original = list('limina')
+    target   = 'l i m i n a'.split(' ')
+    result   = 'l e m i n a'.split(' ')
+    output_list = compare_words(target, result, original, api=True, show=True)
+
+    
     original = 'c h a n c h o'.split(' ')
     target   = 'ʃ a n ʃ o'.split(' ')
     result   = 'a s g k h f h ʃ a n a a n ʃ o s o p'.split(' ')
 
-    # print(*compare(target, result, original))
     output_list = compare_words(target, result, original, api=False, show=True)
 
     original = 'q u i q u e'.split(' ')
@@ -539,12 +639,7 @@ if __name__ == '__main__':
 
     output_list = compare_words(target, result, original, api=False, show=True)
 
-    original = list('guitarra')
-    print(original)
-    target   = 'ɡ i t a r a'.split(' ')
-    result   = 'ɡ i t a t l a'.split(' ')
-    print(compare_words(target, result, original, api=True, show=True))
-    # print(compare_words(target, result, original, api=True, show=True, jsonif=True))
+    """
 
     
     '''
