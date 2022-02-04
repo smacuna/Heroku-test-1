@@ -411,10 +411,10 @@ def analyze_comparison(target, result, original, tolerance=3):
                 output_list.append(Letter(remaining_letter, bcolors.ROJO))
             break
 
-    # Fin de for de tolerancia
+    # Se ha obtenido una lista
 
     last_green = -10
-    next_green = -100
+    next_green = 1000000
     # last_green_index = -10
     # last_was_green = False
     for o_i, output_letter in enumerate(output_list):
@@ -489,7 +489,7 @@ def compare(target, result, original):
     max_tolerance = 3  # Este número indica el grado de tolerancia de letras entremedio de letras correctas
     # Iteraremos entre los distintos grados de tolerancia hasta el máximo
     best_list = []
-    best_score = 0
+    best_score = -1
 
     for i in range(len(original)):  # Se obtendrán las listas de las palabras cortadas
         new_target, new_word = obtain_new_lists(target, original, i)
@@ -508,7 +508,8 @@ def compare(target, result, original):
             if list_score >= best_score:
                 best_list = output_list.copy()
                 best_score = list_score
-
+                if best_score == 1:  # Si ya encontró que tiene 100%, entonces se debe retornar la lista
+                    return best_list
     return best_list
 
 def score_results(letters_list, list_length=-1):
@@ -521,9 +522,9 @@ def score_results(letters_list, list_length=-1):
     greens = [letter for letter in letters_list if letter.color == bcolors.VERDE]
     suma += len(greens)
 
-     # Amarillos suman 0.5
+     # Amarillos suman 0.25
     yellows = [letter for letter in letters_list if letter.color == bcolors.AMARILLO]
-    suma += 0.5*len(yellows)
+    suma += 0.25*len(yellows)
 
     score = suma/length
     return score
