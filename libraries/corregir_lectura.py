@@ -403,7 +403,8 @@ def analyze_comparison(target, result, original, tolerance=3):
             if last_h:
                 output_list.append(Letter(original[i-1], bcolors.VERDE))
                 last_h = False
-            output_list.append(Letter(letter, bcolors.VERDE, result_index=j_result-1))
+            # output_list.append(Letter(letter, bcolors.VERDE, result_index=j_result-1))
+            output_list.append(Letter(letter, bcolors.VERDE, result_index=i_target))
 
         i_target += 1
         if i_target >= len(target):
@@ -426,6 +427,7 @@ def analyze_comparison(target, result, original, tolerance=3):
                         # print(last_green, next_green)
                         break
                 if last_green + tolerance >= next_green:  
+                    print(f'last_green = {last_green}, next_green = {next_green}')
                     output_list[o_i].color = bcolors.AMARILLO
             # last_was_green = False
         elif output_letter.color == bcolors.VERDE:
@@ -590,13 +592,13 @@ if __name__ == '__main__':
     target   = 'p l e l o m i n a'.split(' ')
     result   = 'o h k a a'.split(' ')
 
-    original = list('elimina')
-    target   = 'e l i m i n a'.split(' ')
-    result   = 'l e m i n a'.split(' ')
+    # original = list('elimina')
+    # target   = 'e l i m i n a'.split(' ')
+    # result   = 'l e m i n a'.split(' ')
 
-    original = list('porque')
-    target   = 'p o ɾ k e'.split(' ')
-    result   = 'a'.split(' ')
+    # original = list('zarapito')
+    # target   = 's a ɾ a p i t o'.split(' ')
+    # result   = 's ɾ p o'.split(' ')
     output_list = compare_words(target, result, original, api=True, show=True)
     # print(compare_words(target, result, original, api=True, show=True, jsonif=True))
     """
