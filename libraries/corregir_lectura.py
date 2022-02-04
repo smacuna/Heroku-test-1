@@ -425,7 +425,7 @@ def analyze_comparison(target, result, original, tolerance=3):
                         next_green = next_letter.result_index
                         # print(last_green, next_green)
                         break
-                if last_green + tolerance >= next_green:  # El 2 aquí tambien marca un grado de tolerancia
+                if last_green + tolerance >= next_green:  
                     output_list[o_i].color = bcolors.AMARILLO
             # last_was_green = False
         elif output_letter.color == bcolors.VERDE:
@@ -440,6 +440,7 @@ def analyze_comparison(target, result, original, tolerance=3):
             # last_was_green = True
 
             last_green = output_letter.result_index
+            next_green = 1000000
     return output_list
 
 
@@ -592,6 +593,10 @@ if __name__ == '__main__':
     original = list('elimina')
     target   = 'e l i m i n a'.split(' ')
     result   = 'l e m i n a'.split(' ')
+
+    original = list('porque')
+    target   = 'p o ɾ k e'.split(' ')
+    result   = 'a'.split(' ')
     output_list = compare_words(target, result, original, api=True, show=True)
     # print(compare_words(target, result, original, api=True, show=True, jsonif=True))
     """
