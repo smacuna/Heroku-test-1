@@ -79,6 +79,9 @@ def evaluate(filename, target, word):
 
     c = model_3.recognize(filename, 'spa')
     lista_c = c.split(" ")
+
+    d = model_4.recognize(filename, 'spa')
+    lista_d = d.split(" ")
     # print(*target)
     # print(*lista_a)
     # return evaluar_desempeno(target, lista_a, api=True, lista_b=lista_b, lista_c=lista_c)
@@ -86,6 +89,8 @@ def evaluate(filename, target, word):
     output['model_original'] = lista_a
     output['model_spanish3'] = lista_b
     output['model_spanish8'] = lista_c
+    output['model_spanish9'] = lista_d
+    output['result_spanish9'] = compare_words(target, lista_d, word, api=True, show=False, jsonif=False)
 
     return jsonify(output)
 
@@ -151,4 +156,10 @@ src = 'models/spanish8'
 dst = '/usr/local/lib/python3.8/site-packages/allosaurus/pretrained'
 shutil.move(src, dst)
 model_3 = read_recognizer('spanish8')
+
+src = 'models/spanish9'
+dst = '/usr/local/lib/python3.8/site-packages/allosaurus/pretrained'
+shutil.move(src, dst)
+model_4 = read_recognizer('spanish9')
+
 app.run(host='0.0.0.0', port=int(os.environ.get('PORT', 5000)))
