@@ -324,11 +324,13 @@ def analyze_comparison(target, result, original, tolerance=3):
 
         if letter == 'q':  # Se deben manejar los casos 'que' y 'qui' ('ke' y 'ki')
             if i + 1 < len(original) and i + 2 < len(original):
-                if original[i+1] == 'u' and (original[i+2] == 'e' or original[i+2] == 'i'):
+                if original[i+1] == 'u' and (
+                    original[i+2] == 'e' or original[i+2] == 'i' or original[i+2] == 'é' or original[i+2] == 'í'):
                     ignorable.add(i+1)
         elif letter == 'g':  # Se deben manejar los casos 'gue' y 'gui' ('ɡe' y 'ɡi')
             if i + 1 < len(original) and i + 2 < len(original):
-                if original[i+1] == 'u' and (original[i+2] == 'e' or original[i+2] == 'i'):
+                if original[i+1] == 'u' and (
+                    original[i+2] == 'e' or original[i+2] == 'i' or original[i+2] == 'é' or original[i+2] == 'í'):
                     ignorable.add(i+1)
         elif letter == 'r':  # Se debe manejar el caso de la 'rr'
             if i + 1 < len(original):
@@ -458,8 +460,10 @@ def obtain_new_lists(target, original, i):
         or_letter = original[j]
         if or_letter == 'u':  # Se deben manejar los casos 'que' y 'qui' ('ke' y 'ki') y 'gue' y 'gui' ('ɡe' y 'ɡi')
             if j - 1 >= 0 and j + 1 < len(original):
-                condition1 = original[j-1] == 'q' and (original[j+1] == 'e' or original[j+1] == 'i')
-                condition2 = original[j-1] == 'g' and (original[j+1] == 'e' or original[j+1] == 'i')
+                condition1 = original[j-1] == 'q' and (
+                    original[j+1] == 'e' or original[j+1] == 'i' or original[j+1] == 'é' or original[j+1] == 'í')
+                condition2 = original[j-1] == 'g' and (
+                    original[j+1] == 'e' or original[j+1] == 'i' or original[j+1] == 'é' or original[j+1] == 'í')
                 if condition1 or condition2:
                     # print(f'{bcolors.AMARILLO} hola {bcolors.ENDC}')
                     # No se debe eliminar del target (No se suma 1 a k)
@@ -593,6 +597,10 @@ if __name__ == '__main__':
     original = list('plelomina')
     target   = 'p l e l o m i n a'.split(' ')
     result   = 'o h k a a'.split(' ')
+
+    original = list('químico')
+    target   = 'k i m i k o'.split(' ')
+    result   = 'i m i k o'.split(' ')
 
     # original = list('elimina')
     # target   = 'e l i m i n a'.split(' ')
