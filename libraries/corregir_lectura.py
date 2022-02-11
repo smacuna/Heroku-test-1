@@ -365,6 +365,8 @@ def analyze_comparison(target, result, original, tolerance=3):
             if j < len(result):
                 r_phone = result[j]
                 if r_phone in sim_letters:
+                    if i_target >= len(target):  # Se agregó para que no se caiga
+                        break
                     if target[i_target] in sim_letters[r_phone]:
                         # print(f'{bcolors.VERDE}{letter}: j = {j} -> r_phone = {r_phone}{bcolors.ENDC}')
                         found = True
