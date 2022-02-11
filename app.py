@@ -85,7 +85,7 @@ def evaluate(filename, target, word):
 
     e = model_5.recognize(filename, 'spa')
     lista_e = e.split(" ")
-    
+
     # print(*target)
     # print(*lista_a)
     # return evaluar_desempeno(target, lista_a, api=True, lista_b=lista_b, lista_c=lista_c)
@@ -170,6 +170,6 @@ model_4 = read_recognizer('spanish9')
 src = 'models/spanish10'
 dst = '/usr/local/lib/python3.8/site-packages/allosaurus/pretrained'
 shutil.move(src, dst)
-model_5 = read_recognizer('spanish9')
+model_5 = read_recognizer('spanish10')
 
 app.run(host='0.0.0.0', port=int(os.environ.get('PORT', 5000)))
