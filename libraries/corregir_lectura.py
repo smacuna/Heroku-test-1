@@ -364,9 +364,9 @@ def analyze_comparison(target, result, original, tolerance=3):
         for j in range(j_result, last_j):  # Desde que empieza la palabra restante en 'result' hasta lo que indica 'last_j'
             if j < len(result):
                 r_phone = result[j]
+                if i_target >= len(target):  # Se agregó para que no se caiga
+                    break
                 if r_phone in sim_letters:
-                    if i_target >= len(target):  # Se agregó para que no se caiga
-                        break
                     if target[i_target] in sim_letters[r_phone]:
                         # print(f'{bcolors.VERDE}{letter}: j = {j} -> r_phone = {r_phone}{bcolors.ENDC}')
                         found = True
