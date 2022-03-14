@@ -1,11 +1,14 @@
 from flask import Flask, request, make_response, jsonify
 from flask_cors import CORS, cross_origin
 import subprocess
-from libraries.corregir_lectura import evaluar_desempeno, compare_words
+from libraries.corregir_lectura import compare_words
 from allosaurus.app import read_recognizer
 import os
 import shutil
 
+import noisereduce as nr
+
+# Se prepara la app
 UPLOAD_FOLDER = '/tmp'
 
 app = Flask(__name__)
@@ -91,7 +94,6 @@ def evaluate(filename, target, word):
 
     # print(*target)
     # print(*lista_a)
-    # return evaluar_desempeno(target, lista_a, api=True, lista_b=lista_b, lista_c=lista_c)
     output = compare_words(target, lista_c, word, api=True, show=False, jsonif=False)
     output['model_original'] = lista_a
     output['model_spanish3'] = lista_b
@@ -110,11 +112,10 @@ def _build_cors_prelight_response():
     response.headers.add('Access-Control-Allow-Methods', '*')
     return response
 
-
+# A continuación se hacen las rutas
 @app.route('/')
 def home():
     return '<h1>Hola gente!</h1>'
-
 
 @cross_origin
 @app.route('/upload', methods=['GET', 'POST', 'OPTIONS'])
@@ -134,6 +135,9 @@ def upload():
         return evaluate(wav_path, target, word)
 
 
+# La función a continuación (test_speed) tenía el propósito de encontrar cuánto tiempo se demora en encontrar los resultados
+#   sin embargo, no se alcanzó a desarrollar 
+'''
 @cross_origin
 @app.route('/test_speed', methods=['GET', 'POST', 'OPTIONS'])
 def test_speed():
@@ -151,8 +155,9 @@ def test_speed():
         result = request.json['result'].split(" ")
         # return evaluate(wav_path, target)
         return jsonify(compare_words(target, result, word, api=True, show=False, jsonif=False))
+'''
 
-
+# Se cargan los modelos
 model = read_recognizer()
 
 src = 'models/spanish3'
@@ -181,4 +186,5 @@ dst = '/usr/local/lib/python3.8/site-packages/allosaurus/pretrained'
 shutil.move(src, dst)
 model_6 = read_recognizer('spanish11')
 
+# Se corre la app
 app.run(host='0.0.0.0', port=int(os.environ.get('PORT', 5000)))
