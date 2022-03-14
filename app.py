@@ -6,7 +6,7 @@ from allosaurus.app import read_recognizer
 import os
 import shutil
 
-import noisereduce as nr
+# import noisereduce as nr
 
 # Se prepara la app
 UPLOAD_FOLDER = '/tmp'
