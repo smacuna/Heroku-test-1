@@ -94,7 +94,7 @@ def evaluate(filename, target, word):
 
     # print(*target)
     # print(*lista_a)
-    output = compare_words(target, lista_c, word, api=True, show=False, jsonif=False)
+    output = compare_words(target, lista_f, word, api=True, show=False, jsonif=False)
     output['model_original'] = lista_a
     output['model_spanish3'] = lista_b
     output['model_spanish8'] = lista_c
