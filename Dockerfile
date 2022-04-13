@@ -17,6 +17,7 @@ RUN pip install flask
 RUN pip3 install --no-cache-dir torch==1.10.1
 RUN pip3 install --no-cache-dir allosaurus
 RUN pip install -U flask-cors
+RUN pip install noisereduce
 
 RUN apt update && apt install ffmpeg -y
 
