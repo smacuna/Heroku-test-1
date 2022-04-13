@@ -2,6 +2,7 @@ from flask import Flask, request, make_response, jsonify
 from flask_cors import CORS, cross_origin
 import subprocess
 from libraries.corregir_lectura import compare_words
+from libraries.filter_noise import filter_audio
 from allosaurus.app import read_recognizer
 import os
 import shutil
@@ -126,12 +127,15 @@ def upload():
     elif request.method == 'POST':
         print('Post!')
         byte_data = bytes(request.json['audio'])
+        # Guardar datos en archivo webm
         webm_path, tempDir = save_to_webm(byte_data, 'test')
+        # Convertir webm a wav
         wav_path = convert_webm_to_wav(webm_path)
-        # target = 'e s t e s u n k o ð i ɡ o ð e x e m p l o'.split(" ")
+        # Filtrar audio (descomentar la siguiente línea si se quiere filtrar el audio antes de procesar)
+        # wav_path = filter_audio(wav_path)
         target = request.json['target'].split(" ")
         word = list(request.json['word'])
-        # return evaluate(wav_path, target)
+        # Evaluar resultado
         return evaluate(wav_path, target, word)
 
 
@@ -149,7 +153,6 @@ def test_speed():
         # byte_data = bytes(request.json['audio'])
         # webm_path, tempDir = save_to_webm(byte_data, 'test')
         # wav_path = convert_webm_to_wav(webm_path)
-        # target = 'e s t e s u n k o ð i ɡ o ð e x e m p l o'.split(" ")
         target = request.json['target'].split(" ")
         word = list(request.json['word'])
         result = request.json['result'].split(" ")
